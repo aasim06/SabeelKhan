@@ -117,7 +117,7 @@
         </div>
         
         <!-- Mode Switcher -->
-        <div class="form-row">
+        <!-- <div class="form-row">
             <div class="row">
                 <div class="col-md-6">
                     <label class="form-label">Measurement Mode</label>
@@ -133,7 +133,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         
         <!-- Order Items Section -->
         <h2>Order Items</h2>
@@ -277,6 +277,8 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    
+
     <script>
         // Initialize jsPDF
         window.jsPDF = window.jspdf.jsPDF;
@@ -369,18 +371,6 @@
             document.getElementById('submitOrder').addEventListener('click', submitOrder);
             document.getElementById('printInvoiceBtn').addEventListener('click', showInvoiceModal);
 
-            // Measurement mode switcher
-            document.getElementById('measurementMode').addEventListener('change', function() {
-                settings.measurementMode = this.value;
-                renderOrderItems();
-            });
-
-            // Show standard rates toggle
-            document.getElementById('showStandardRates').addEventListener('change', function() {
-                settings.showStandardRates = this.checked;
-                renderOrderItems();
-            });
-
             // Client name autocomplete
             document.getElementById('clientName').addEventListener('input', function() {
                 const input = this.value.toLowerCase();
@@ -453,10 +443,8 @@
             
             if(!glassType || !thickness) return;
             
-            const areaSqIn = width * height;
-            const areaSqFt = settings.measurementMode === 'accurate' 
-                ? areaSqIn / 144 
-                : areaSqIn / 100;
+            // Calculate square feet using custom method
+            const areaSqFt = calculateCustomSqFt(width, height);
             
             const actualRate = glassPrices[glassType][thickness].actual;
             const standardRate = glassPrices[glassType][thickness].standard;
@@ -466,6 +454,34 @@
             
             document.getElementById('newPrice').value = actualRate;
             document.getElementById('newTotal').value = actualTotal.toFixed(2);
+        }
+
+        function calculateCustomSqFt(width, height) {
+            // Convert inches to feet
+            const widthFt = width / 12;
+            const heightFt = height / 12;
+            
+            // Apply custom rounding rules
+            const roundedWidth = customRound(widthFt, width);
+            const roundedHeight = customRound(heightFt, height);
+            
+            // Return square feet
+            return roundedWidth * roundedHeight;
+        }
+
+        function customRound(dimensionFt, dimensionInches) {
+            // Special case for exactly 42.5 inches
+            if (dimensionInches === 42.5) {
+                return Math.ceil(dimensionFt);
+            }
+            
+            if (dimensionInches <= 15) {
+                // Small panels (≤15"): round UP to next 0.25 ft
+                return Math.ceil(dimensionFt * 4) / 4;
+            } else {
+                // Larger panels (>15"): round UP to next 0.5 ft
+                return Math.ceil(dimensionFt * 2) / 2;
+            }
         }
 
         function addOrderItem() {
@@ -495,15 +511,23 @@
             
             // Create order item object
             const item = {
-                glassType: document.getElementById('newGlassType').value,
-                thickness: document.getElementById('newThickness').value,
-                width: parseFloat(document.getElementById('newWidth').value),
-                height: parseFloat(document.getElementById('newHeight').value),
-                quantity: parseInt(document.getElementById('newQuantity').value),
-                pricePerSqFeet: parseFloat(document.getElementById('newPrice').value),
-                totalPrice: parseFloat(document.getElementById('newTotal').value),
-                measurementMode: settings.measurementMode
-            };
+    glassType: document.getElementById('newGlassType').value,
+    thickness: document.getElementById('newThickness').value,
+    width: parseFloat(document.getElementById('newWidth').value),
+    height: parseFloat(document.getElementById('newHeight').value),
+    quantity: parseInt(document.getElementById('newQuantity').value),
+    pricePerSqFeet: parseFloat(document.getElementById('newPrice').value),
+    totalPrice: parseFloat(document.getElementById('newTotal').value),
+    measurementMode: settings.measurementMode,
+    roundedWidth: customRound(
+        parseFloat(document.getElementById('newWidth').value) / 12, 
+        parseFloat(document.getElementById('newWidth').value)
+    ),
+    roundedHeight: customRound(
+        parseFloat(document.getElementById('newHeight').value) / 12, 
+        parseFloat(document.getElementById('newHeight').value)
+    )
+};
             
             // Add to order items array
             orderItems.push(item);
@@ -530,8 +554,7 @@
             
             orderItems.forEach((item, index) => {
                 const areaSqIn = item.width * item.height;
-                const areaSqFtAccurate = (areaSqIn / 144).toFixed(2);
-                const areaSqFtMarket = (areaSqIn / 100).toFixed(2);
+                const areaSqFt = (item.roundedWidth * item.roundedHeight).toFixed(2);
                 
                 const standardRate = glassPrices[item.glassType][item.thickness].standard;
                 const standardTotal = (item.totalPrice / item.pricePerSqFeet * standardRate).toFixed(2);
@@ -553,7 +576,8 @@
                             <strong>Qty:</strong> ${item.quantity}
                         </div>
                         <div class="col-md-1">
-                            <strong>Sq.Ft:</strong> ${item.measurementMode === 'accurate' ? areaSqFtAccurate : areaSqFtMarket}
+                            <strong>Sq.Ft:</strong> ${areaSqFt}
+                            <small class="d-block">(${item.roundedWidth}×${item.roundedHeight})</small>
                         </div>
                         <div class="col-md-2">
                             <strong>Actual Rate:</strong> ${item.pricePerSqFeet}/sq.ft
@@ -658,7 +682,7 @@
             
             orderItems.forEach(item => {
                 const areaSqIn = item.width * item.height;
-                const areaSqFt = settings.measurementMode === 'accurate' ? areaSqIn / 144 : areaSqIn / 100;
+                const areaSqFt = item.roundedWidth * item.roundedHeight;
                 
                 salesData.push({
                     orderId: currentOrderId,
@@ -672,6 +696,8 @@
                     quantity: item.quantity,
                     areaSqIn: areaSqIn.toFixed(2),
                     areaSqFt: areaSqFt.toFixed(2),
+                    roundedWidth: item.roundedWidth,
+                    roundedHeight: item.roundedHeight,
                     pricePerSqFeet: item.pricePerSqFeet,
                     standardPricePerSqFeet: glassPrices[item.glassType][item.thickness].standard,
                     totalPrice: item.totalPrice,
@@ -805,6 +831,8 @@
                     size: `${item.width}" × ${item.height}"`,
                     quantity: item.quantity,
                     area: item.areaSqFt,
+                    roundedWidth: item.roundedWidth,
+                    roundedHeight: item.roundedHeight,
                     rate: item.pricePerSqFeet,
                     standardRate: item.standardPricePerSqFeet,
                     amount: item.totalPrice
@@ -847,6 +875,7 @@
                             <th>Size</th>
                             <th>Qty</th>
                             <th>Area (sq.ft)</th>
+                            <th>Rounded Dimensions</th>
                             <th>Rate</th>
                             ${settings.showStandardRates ? '<th>Std Rate</th>' : ''}
                             <th>Amount</th>
@@ -860,6 +889,7 @@
                                 <td>${item.size}</td>
                                 <td>${item.quantity}</td>
                                 <td>${item.area}</td>
+                                <td>${item.roundedWidth} × ${item.roundedHeight} ft</td>
                                 <td>₨${item.rate.toFixed(2)}</td>
                                 ${settings.showStandardRates ? `<td>₨${item.standardRate.toFixed(2)}</td>` : ''}
                                 <td>₨${item.amount.toFixed(2)}</td>
@@ -868,15 +898,15 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="${settings.showStandardRates ? 6 : 5}" class="text-end"><strong>Subtotal:</strong></td>
+                            <td colspan="${settings.showStandardRates ? 7 : 6}" class="text-end"><strong>Subtotal:</strong></td>
                             <td>₨${currentInvoiceData.subtotal.toFixed(2)}</td>
                         </tr>
                         <tr class="table-primary">
-                            <td colspan="${settings.showStandardRates ? 6 : 5}" class="text-end"><strong>Amount Paid:</strong></td>
+                            <td colspan="${settings.showStandardRates ? 7 : 6}" class="text-end"><strong>Amount Paid:</strong></td>
                             <td>₨${currentInvoiceData.amountPaid.toFixed(2)}</td>
                         </tr>
                         <tr class="table-warning">
-                            <td colspan="${settings.showStandardRates ? 6 : 5}" class="text-end"><strong>Balance Due:</strong></td>
+                            <td colspan="${settings.showStandardRates ? 7 : 6}" class="text-end"><strong>Balance Due:</strong></td>
                             <td>₨${currentInvoiceData.balanceDue.toFixed(2)}</td>
                         </tr>
                     </tfoot>
@@ -923,8 +953,8 @@
             
             // Order Items Table
             const headers = settings.showStandardRates 
-                ? [['No', 'Description', 'Size', 'Qty', 'Area (ft²)', 'Rate', 'Std Rate', 'Amount']]
-                : [['No', 'Description', 'Size', 'Qty', 'Area (ft²)', 'Rate', 'Amount']];
+                ? [['No', 'Description', 'Size', 'Qty', 'Area (ft²)', 'Rounded Dim', 'Rate', 'Std Rate', 'Amount']]
+                : [['No', 'Description', 'Size', 'Qty', 'Area (ft²)', 'Rounded Dim', 'Rate', 'Amount']];
                 
             const itemsData = currentInvoiceData.items.map((item, index) => {
                 const row = [
@@ -933,6 +963,7 @@
                     item.size,
                     item.quantity,
                     item.area,
+                    `${item.roundedWidth}×${item.roundedHeight}`,
                     item.rate.toFixed(2)
                 ];
                 
@@ -952,13 +983,14 @@
                 headStyles: { fillColor: [51, 51, 51] },
                 columnStyles: {
                     0: { cellWidth: 10 },
-                    1: { cellWidth: settings.showStandardRates ? 30 : 40 },
+                    1: { cellWidth: 30 },
                     2: { cellWidth: 25 },
                     3: { cellWidth: 15 },
                     4: { cellWidth: 20 },
-                    5: { cellWidth: 20 },
-                    ...(settings.showStandardRates ? { 6: { cellWidth: 20 } } : {}),
-                    [settings.showStandardRates ? 7 : 6]: { cellWidth: 25 }
+                    5: { cellWidth: 25 },
+                    6: { cellWidth: 20 },
+                    ...(settings.showStandardRates ? { 7: { cellWidth: 20 } } : {}),
+                    [settings.showStandardRates ? 8 : 7]: { cellWidth: 25 }
                 }
             });
             
