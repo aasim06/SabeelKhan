@@ -232,11 +232,11 @@
                     </select>
                 </div>
                 <div class="col-4 mb-3">
-                    <label class="form-label">Width (in)</label>
+                    <label class="form-label">Width</label>
                     <input type="number" step="0.1" id="newWidth" class="form-control width" required>
                 </div>
                 <div class="col-4 mb-3">
-                    <label class="form-label">Height (in)</label>
+                    <label class="form-label">Height</label>
                     <input type="number" step="0.1" id="newHeight" class="form-control height" required>
                 </div>
                 <div class="col-4 mb-3">
@@ -282,7 +282,10 @@
         <div class="text-center mb-4">
             <div class="text-center mb-4">
                 <button id="submitOrder" class="btn btn-primary btn-lg me-2">Submit Order</button>
-                <button id="printInvoiceBtn" class="btn btn-secondary btn-lg" disabled>Print Invoice</button>
+                <button id="printInvoiceBtn" class="btn btn-secondary btn-lg d-none d-md-inline-block" disabled>
+                    Print Invoice
+                  </button>
+                  
             </div>
         </div>
 
