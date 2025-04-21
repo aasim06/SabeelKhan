@@ -95,7 +95,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-4">Raza Glass and Aluminum</h1>
+        <h1 class="text-center mb-4">Raza Glass</h1>
         
         <!-- Client Information -->
         <div class="form-row">
@@ -117,7 +117,7 @@
         </div>
         
         <!-- Mode Switcher -->
-        <!-- <div class="form-row">
+         <!-- <div class="form-row">
             <div class="row">
                 <div class="col-md-6">
                     <label class="form-label">Measurement Mode</label>
@@ -133,7 +133,7 @@
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>  -->
         
         <!-- Order Items Section -->
         <h2>Order Items</h2>
@@ -334,6 +334,14 @@
             }
         };
 
+        document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space') {
+        e.preventDefault(); // Prevent page scroll
+        settings.showStandardRates = !settings.showStandardRates;
+        renderOrderItems(); // Refresh the display
+    }
+});
+
         let orderItems = [];
         let salesData = [];
         let clientsData = [];
@@ -485,68 +493,75 @@
         }
 
         function addOrderItem() {
-            // Validate inputs
-            const inputs = [
-                document.getElementById('newGlassType'),
-                document.getElementById('newThickness'),
-                document.getElementById('newWidth'),
-                document.getElementById('newHeight'),
-                document.getElementById('newQuantity')
-            ];
-            
-            let isValid = true;
-            inputs.forEach(input => {
-                if (!input.value) {
-                    input.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    input.classList.remove('is-invalid');
-                }
-            });
-            
-            if (!isValid) {
-                alert('Please fill all required fields');
-                return;
-            }
-            
-            // Create order item object
-            const item = {
-    glassType: document.getElementById('newGlassType').value,
-    thickness: document.getElementById('newThickness').value,
-    width: parseFloat(document.getElementById('newWidth').value),
-    height: parseFloat(document.getElementById('newHeight').value),
-    quantity: parseInt(document.getElementById('newQuantity').value),
-    pricePerSqFeet: parseFloat(document.getElementById('newPrice').value),
-    totalPrice: parseFloat(document.getElementById('newTotal').value),
-    measurementMode: settings.measurementMode,
-    roundedWidth: customRound(
-        parseFloat(document.getElementById('newWidth').value) / 12, 
-        parseFloat(document.getElementById('newWidth').value)
-    ),
-    roundedHeight: customRound(
-        parseFloat(document.getElementById('newHeight').value) / 12, 
-        parseFloat(document.getElementById('newHeight').value)
-    )
-};
-            
-            // Add to order items array
-            orderItems.push(item);
-            
-            // Update UI
-            renderOrderItems();
-            
-            // Clear form
-            document.getElementById('newGlassType').value = '';
-            document.getElementById('newThickness').innerHTML = '<option value="">Select</option>';
-            document.getElementById('newWidth').value = '';
-            document.getElementById('newHeight').value = '';
-            document.getElementById('newQuantity').value = '';
-            document.getElementById('newPrice').value = '';
-            document.getElementById('newTotal').value = '';
-            
-            // Focus on glass type
-            document.getElementById('newGlassType').focus();
+    // Validate inputs
+    const inputs = [
+        document.getElementById('newGlassType'),
+        document.getElementById('newThickness'),
+        document.getElementById('newWidth'),
+        document.getElementById('newHeight'),
+        document.getElementById('newQuantity')
+    ];
+    
+    let isValid = true;
+    inputs.forEach(input => {
+        if (!input.value) {
+            input.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            input.classList.remove('is-invalid');
         }
+    });
+    
+    if (!isValid) {
+        alert('Please fill all required fields');
+        return;
+    }
+    
+    // Create order item object
+    const item = {
+        glassType: document.getElementById('newGlassType').value,
+        thickness: document.getElementById('newThickness').value,
+        width: parseFloat(document.getElementById('newWidth').value),
+        height: parseFloat(document.getElementById('newHeight').value),
+        quantity: parseInt(document.getElementById('newQuantity').value),
+        pricePerSqFeet: parseFloat(document.getElementById('newPrice').value),
+        totalPrice: parseFloat(document.getElementById('newTotal').value),
+        measurementMode: settings.measurementMode,
+        roundedWidth: customRound(
+            parseFloat(document.getElementById('newWidth').value) / 12, 
+            parseFloat(document.getElementById('newWidth').value)
+        ),
+        roundedHeight: customRound(
+            parseFloat(document.getElementById('newHeight').value) / 12, 
+            parseFloat(document.getElementById('newHeight').value)
+        )
+    };
+    
+    // Add to order items array
+    orderItems.push(item);
+    
+    // Update UI
+    renderOrderItems();
+    
+    // Store current glass type and thickness before clearing
+    const currentGlassType = document.getElementById('newGlassType').value;
+    const currentThickness = document.getElementById('newThickness').value;
+    
+    // Clear form (except glass type and thickness)
+    document.getElementById('newWidth').value = '';
+    document.getElementById('newHeight').value = '';
+    document.getElementById('newQuantity').value = '';
+    document.getElementById('newPrice').value = '';
+    document.getElementById('newTotal').value = '';
+    
+    // Restore glass type and thickness
+    document.getElementById('newGlassType').value = currentGlassType;
+    updateThicknessOptions(); // Refresh thickness options based on glass type
+    document.getElementById('newThickness').value = currentThickness;
+    
+    // Focus on width field for next entry
+    document.getElementById('newWidth').focus();
+}
 
         function renderOrderItems() {
             const container = document.getElementById('orderItemsContainer');
@@ -577,7 +592,6 @@
                         </div>
                         <div class="col-md-1">
                             <strong>Sq.Ft:</strong> ${areaSqFt}
-                            <small class="d-block">(${item.roundedWidth}×${item.roundedHeight})</small>
                         </div>
                         <div class="col-md-2">
                             <strong>Actual Rate:</strong> ${item.pricePerSqFeet}/sq.ft
@@ -774,8 +788,8 @@
             document.getElementById('remainingBalance').value = orderItemsToEdit.reduce((sum, item) => sum + parseFloat(item.remainingBalance), 0);
             
             // Set measurement mode
-            settings.measurementMode = order.measurementMode;
-            document.getElementById('measurementMode').value = order.measurementMode;
+            // settings.measurementMode = order.measurementMode;
+            // document.getElementById('measurementMode').value = order.measurementMode;
             
             // Clear existing order items
             orderItems = [];
@@ -848,8 +862,8 @@
             invoicePreview.innerHTML = `
                 <div class="invoice-header text-center">
                     <h2>Raza Glass and Aluminum</h2>
-                    <p>123 Glass Street, City</p>
-                    <p>Phone: 0300-1234567 | Email: info@razaglass.com</p>
+                    <p>Phularwan</p>
+                    <p>Phone: 0302-7026191 | Email: sabeelkhan@gmail.com</p>
                 </div>
                 
                 <div class="row mb-4">
@@ -875,7 +889,7 @@
                             <th>Size</th>
                             <th>Qty</th>
                             <th>Area (sq.ft)</th>
-                            <th>Rounded Dimensions</th>
+                            
                             <th>Rate</th>
                             ${settings.showStandardRates ? '<th>Std Rate</th>' : ''}
                             <th>Amount</th>
@@ -889,7 +903,7 @@
                                 <td>${item.size}</td>
                                 <td>${item.quantity}</td>
                                 <td>${item.area}</td>
-                                <td>${item.roundedWidth} × ${item.roundedHeight} ft</td>
+                               
                                 <td>₨${item.rate.toFixed(2)}</td>
                                 ${settings.showStandardRates ? `<td>₨${item.standardRate.toFixed(2)}</td>` : ''}
                                 <td>₨${item.amount.toFixed(2)}</td>
@@ -932,8 +946,8 @@
             doc.setFontSize(18);
             doc.text('Raza Glass and Aluminum', 105, 15, { align: 'center' });
             doc.setFontSize(12);
-            doc.text('123 Glass Street, City', 105, 22, { align: 'center' });
-            doc.text('Phone: 0300-1234567 | Email: info@razaglass.com', 105, 28, { align: 'center' });
+            doc.text('Phularwan', 105, 22, { align: 'center' });
+            doc.text('Phone: 0302-7026191 | Email:  Sabeelkhan@gmail.com', 105, 28, { align: 'center' });
             
             // Invoice Title
             doc.setFontSize(16);
@@ -953,8 +967,8 @@
             
             // Order Items Table
             const headers = settings.showStandardRates 
-                ? [['No', 'Description', 'Size', 'Qty', 'Area (ft²)', 'Rounded Dim', 'Rate', 'Std Rate', 'Amount']]
-                : [['No', 'Description', 'Size', 'Qty', 'Area (ft²)', 'Rounded Dim', 'Rate', 'Amount']];
+                ? [['No', 'Description', 'Size', 'Qty', 'Area (ft²)', 'Rate', 'Std Rate', 'Amount']]
+                : [['No', 'Description', 'Size', 'Qty', 'Area (ft²)', 'Rate', 'Amount']];
                 
             const itemsData = currentInvoiceData.items.map((item, index) => {
                 const row = [
@@ -963,7 +977,6 @@
                     item.size,
                     item.quantity,
                     item.area,
-                    `${item.roundedWidth}×${item.roundedHeight}`,
                     item.rate.toFixed(2)
                 ];
                 
@@ -998,7 +1011,7 @@
             const finalY = doc.lastAutoTable.finalY + 10;
             
             doc.setFontSize(12);
-            doc.text(`Subtotal: ₨${currentInvoiceData.subtotal.toFixed(2)}`, 160, finalY);
+            doc.text(`Subtotal: ₨${currentInvoiceData.subtotal.toFixed(2)}`, 160, finalY ,{ align: 'center' });
             doc.text(`Amount Paid: ₨${currentInvoiceData.amountPaid.toFixed(2)}`, 160, finalY + 6);
             doc.text(`Balance Due: ₨${currentInvoiceData.balanceDue.toFixed(2)}`, 160, finalY + 12);
             
@@ -1073,7 +1086,7 @@
                     <h3 class="mb-0">Client: <strong>${client.clientName}</strong> (${client.clientNumber}) - ${client.clientAddress}</h3>
                     <button class="btn btn-sm btn-primary export-client-btn" 
                             onclick="exportClientData('${client.clientName}', '${client.clientNumber}')">
-                        Export Single Data
+                        Export
                     </button>
                 `;
                 clientDiv.appendChild(header);
@@ -1117,9 +1130,9 @@
                             <td>${item.date}</td>
                             <td>${item.measurementMode === 'accurate' ? 'Accurate' : 'Market'}</td>
                             <td>
-                                <button class="btn btn-danger btn-sm" onclick="deleteOrder(${item.orderId})">Delete</button>
-                                <button class="btn btn-warning btn-sm ms-1" onclick="editOrder(${item.orderId})">Edit</button>
-                                <button class="btn btn-info btn-sm ms-1" onclick="showSingleInvoice(${item.orderId})">Invoice</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteOrder(${item.orderId})"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-warning btn-sm ms-1" onclick="editOrder(${item.orderId})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-info btn-sm ms-1" onclick="showSingleInvoice(${item.orderId})"><i class="bi bi-file-text"></i></button>
                             </td>
                         `;
                         tbody.appendChild(row);
@@ -1321,6 +1334,12 @@
             link.click();
             document.body.removeChild(link);
         }
+        let lastSelectedThickness = ""; // Yeh variable last selected thickness store karega
+        document.getElementById('newThickness').addEventListener('change', function() {
+    lastSelectedThickness = this.value; // Store the selected thickness
+    updatePricePerSqFeet();
+});
+
     </script>
 </body>
 </html>
