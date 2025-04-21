@@ -91,6 +91,66 @@
         .autocomplete-items div:hover {
             background-color: #e9e9e9;
         }
+        @media (max-width: 767.98px) {
+  .client-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .client-table-container table thead {
+    display: none;
+  }
+
+  .client-table-container table tbody {
+    display: block;
+  }
+
+  .client-table-container table tr {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: #fff;
+  }
+
+  .client-table-container table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+  }
+
+  .client-table-container table td:last-child {
+    border-bottom: none;
+  }
+
+  .client-table-container table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+    flex-basis: 45%;
+    text-align: left;
+  }
+
+  .client-table-container table td[data-label="Action"] {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .client-table-container table td[data-label="Action"]::before {
+    display: none;
+  }
+
+  .client-table-container table tr.order-summary {
+    display: none;
+  }
+}
+
     </style>
 </head>
 <body>
@@ -100,21 +160,22 @@
         <!-- Client Information -->
         <div class="form-row">
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label for="clientName" class="form-label">Name:</label>
-                    <input type="text" id="clientName" class="form-control" required autocomplete="off">
+                    <input type="text" id="clientName" placeholder="Name" class="form-control" required autocomplete="off">
                     <div id="clientNameAutocomplete" class="autocomplete-items"></div>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label for="clientNumber" class="form-label">Number:</label>
-                    <input type="text" id="clientNumber" class="form-control" required>
+                    <input type="text" id="clientNumber" placeholder="Number" class="form-control" required>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label for="clientAddress" class="form-label">Address:</label>
-                    <input type="text" id="clientAddress" class="form-control" required>
+                    <input type="text" id="clientAddress" placeholder="Address" class="form-control" required>
                 </div>
             </div>
         </div>
+        
         
         <!-- Mode Switcher -->
          <!-- <div class="form-row">
@@ -144,7 +205,7 @@
         <!-- Add New Item Form -->
         <div class="form-row">
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-6 mb-3">
                     <label class="form-label">Glass Type</label>
                     <select id="newGlassType" class="form-select glass-type" required>
                         <option value="">Select</option>
@@ -157,7 +218,7 @@
                         <option value="EXTRA CLEAR">EXTRA CLEAR</option>
                     </select>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-6 mb-3">
                     <label class="form-label">Thickness</label>
                     <select id="newThickness" class="form-select thickness" required>
                         <option value="">Select</option>
@@ -170,23 +231,23 @@
                         <option value="12mm">12mm</option>
                     </select>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label class="form-label">Width (in)</label>
                     <input type="number" step="0.1" id="newWidth" class="form-control width" required>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label class="form-label">Height (in)</label>
                     <input type="number" step="0.1" id="newHeight" class="form-control height" required>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label class="form-label">Qty</label>
                     <input type="number" step="1" id="newQuantity" class="form-control quantity" required>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-6 mb-3">
                     <label class="form-label">Price/Sq.Ft</label>
                     <input type="number" step="0.1" id="newPrice" class="form-control price" readonly>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-6 mb-3">
                     <label class="form-label">Total Price</label>
                     <input type="number" step="0.1" id="newTotal" class="form-control total" readonly>
                 </div>
@@ -199,7 +260,7 @@
         <!-- Payment Information -->
         <div class="form-row">
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label for="paymentStatus" class="form-label">Payment Status:</label>
                     <select id="paymentStatus" class="form-select" required>
                         <option value="Paid">Paid</option>
@@ -207,11 +268,11 @@
                         <option value="Partial">Partial</option>
                     </select>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label for="amountPaid" class="form-label">Amount Paid:</label>
                     <input type="number" step="0.1" id="amountPaid" class="form-control">
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-4 mb-3">
                     <label for="remainingBalance" class="form-label">Remaining Balance:</label>
                     <input type="number" step="0.1" id="remainingBalance" class="form-control" readonly>
                 </div>
@@ -335,7 +396,7 @@
         };
 
         document.addEventListener('keydown', function(e) {
-    if (e.code === 'Space') {
+    if (e.code === 'F1') {
         e.preventDefault(); // Prevent page scroll
         settings.showStandardRates = !settings.showStandardRates;
         renderOrderItems(); // Refresh the display
